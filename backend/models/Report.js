@@ -1,17 +1,35 @@
 const mongoose = require('mongoose');
 
 const ReportSchema = new mongoose.Schema({
-  username: { type: String, required: true },
+  username: { type: String, required: true, unique: true, index: true },
   shareId: { type: String, required: true, unique: true },
+  avatarUrl: String,
+  name: String,
+  bio: String,
+  followers: Number,
+  publicRepos: Number,
   scores: {
-    activity: { type: Number },
-    codeQuality: { type: Number },
-    diversity: { type: Number },
-    hiringReadiness: { type: Number },
-    overall: { type: Number }
+    activity: Number,
+    codeQuality: Number,
+    diversity: Number,
+    community: Number,
+    hiringReady: Number,
+    overall: Number
   },
-  data: { type: Object },
-  createdAt: { type: Date, default: Date.now }
-});
+  topRepos: [
+    {
+      name: String,
+      stars: Number,
+      forks: Number,
+      language: String,
+      description: String,
+      url: String
+    }
+  ],
+  languages: { type: mongoose.Schema.Types.Mixed },
+  languageDistribution: [{ name: String, percent: Number }],
+  cachedAt: { type: Date, default: Date.now },
+  expiresAt: { type: Date, index: { expires: 0 } }
+}, { timestamps: true });
 
 module.exports = mongoose.model('Report', ReportSchema);
