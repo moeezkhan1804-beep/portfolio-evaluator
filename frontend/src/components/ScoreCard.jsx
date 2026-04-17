@@ -11,6 +11,64 @@ import {
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend)
 
+function CircularProgress({ score }) {
+  const radius = 54
+  const stroke = 8
+  const normalizedRadius = radius - stroke / 2
+  const circumference = 2 * Math.PI * normalizedRadius
+  const progress = circumference - (score / 100) * circumference
+
+  const getColor = (s) => {
+    if (s >= 75) return '#34d399'
+    if (s >= 50) return '#6366f1'
+    if (s >= 25) return '#fb923c'
+    return '#f87171'
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '24px' }}>
+      <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: '0 0 12px' }}>Overall Score</p>
+      <svg width={radius * 2} height={radius * 2}>
+        {/* Background ring */}
+        <circle
+          cx={radius}
+          cy={radius}
+          r={normalizedRadius}
+          fill="none"
+          stroke="#0f172a"
+          strokeWidth={stroke}
+        />
+        {/* Progress ring */}
+        <circle
+          cx={radius}
+          cy={radius}
+          r={normalizedRadius}
+          fill="none"
+          stroke={getColor(score)}
+          strokeWidth={stroke}
+          strokeDasharray={circumference}
+          strokeDashoffset={progress}
+          strokeLinecap="round"
+          transform={`rotate(-90 ${radius} ${radius})`}
+          style={{ transition: 'stroke-dashoffset 1s ease' }}
+        />
+        {/* Score text */}
+        <text
+          x={radius}
+          y={radius}
+          textAnchor="middle"
+          dominantBaseline="central"
+          fill="#f1f5f9"
+          fontSize="22"
+          fontWeight="800"
+        >
+          {score}
+        </text>
+      </svg>
+    </div>
+  )
+}
+
 function ScoreCard({ scores }) {
   if (!scores) return null
 
@@ -50,12 +108,8 @@ function ScoreCard({ scores }) {
 
   return (
     <div style={styles.card}>
-      {/* Overall Score */}
-      <div style={styles.overall}>
-        <p style={styles.overallLabel}>Overall Score</p>
-        <p style={styles.overallScore}>{scores.overall}</p>
-        <p style={styles.outOf}>/100</p>
-      </div>
+      {/* Circular Progress Ring */}
+      <CircularProgress score={scores.overall || 0} />
 
       {/* Radar Chart */}
       <div style={styles.chartBox}>
@@ -82,10 +136,6 @@ function ScoreCard({ scores }) {
 
 const styles = {
   card: { background: '#1e293b', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '600px', marginTop: '20px' },
-  overall: { textAlign: 'center', marginBottom: '16px' },
-  overallLabel: { color: '#94a3b8', fontSize: '0.9rem', margin: '0' },
-  overallScore: { color: '#f1f5f9', fontSize: '4rem', fontWeight: '800', margin: '0', lineHeight: '1' },
-  outOf: { color: '#475569', fontSize: '1rem', margin: '0' },
   chartBox: { width: '100%', maxWidth: '320px', margin: '0 auto 24px' },
   grid: { display: 'flex', flexDirection: 'column', gap: '16px' },
   item: { display: 'flex', flexDirection: 'column', gap: '6px' },

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { getReport } from '../utils/api'
 import ScoreCard from '../components/ScoreCard'
 import ProfileCard from '../components/ProfileCard'
+import HeatMap from '../components/HeatMap'
 
 function Report() {
   const { shareId } = useParams()
@@ -52,6 +53,7 @@ function Report() {
 
       <ProfileCard profile={data.profile} />
       <ScoreCard scores={data.scores} />
+      <HeatMap data={data.profile?.heatmapData || []} />
 
       <div style={styles.shareBox}>
         <p style={styles.shareLabel}>Shareable Link</p>
