@@ -75,6 +75,18 @@ router.post('/evaluate', async (req, res) => {
   }
 });
 
+router.get('/leaderboard', async (req, res) => {
+  try {
+    const reports = await Report.find({})
+      .sort({ 'scores.overall': -1 })
+      .limit(20)
+      .select('username name avatarUrl scores shareId')
+    res.json(reports);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get('/report/:shareId', async (req, res) => {
   try {
     const report = await Report.findOne({ shareId: req.params.shareId });
