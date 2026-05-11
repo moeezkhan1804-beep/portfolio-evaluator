@@ -3,10 +3,12 @@ import Home from './pages/Home'
 import Report from './pages/Report'
 import Compare from './pages/Compare'
 import ThemeToggle from './components/ThemeToggle'
+import ToastProvider from './components/Toast'
 
 function App() {
   return (
     <>
+      <ToastProvider />
       <ThemeToggle />
       <Routes>
         <Route path="/" element={<Home />} />
