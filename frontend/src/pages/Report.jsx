@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react'
 import { getReport } from '../utils/api'
 import ScoreCard from '../components/ScoreCard'
 import ProfileCard from '../components/ProfileCard'
-import HeatMap from '../components/HeatMap'
+import Badges from '../components/Badges'
+import DownloadPDF from '../components/DownloadPDF'
+import Skeleton from '../components/Skeleton'
 
 function Report() {
   const { shareId } = useParams()
@@ -31,9 +33,10 @@ function Report() {
   }
 
   if (loading) return (
-    <div style={styles.center}>
-      <div style={styles.spinner}></div>
-      <p style={styles.text}>Analysing GitHub profile...</p>
+    <div style={styles.container}>
+      <h1 style={styles.title}>Analysing profile...</h1>
+      <Skeleton />
+      <Skeleton />
     </div>
   )
 
@@ -45,15 +48,15 @@ function Report() {
   )
 
   return (
-    <div style={styles.container}>
+    <div id="report-content" style={styles.container} className="fade-in">
       <div style={styles.header}>
         <h1 style={styles.title}>Portfolio Report</h1>
         {data.fromCache && <span style={styles.cacheBadge}>Cached Report</span>}
       </div>
 
       <ProfileCard profile={data.profile} />
+      <Badges scores={data.scores} profile={data.profile} />
       <ScoreCard scores={data.scores} />
-      <HeatMap data={data.profile?.heatmapData || []} />
 
       <div style={styles.shareBox}>
         <p style={styles.shareLabel}>Shareable Link</p>
@@ -65,9 +68,15 @@ function Report() {
         </div>
       </div>
 
-      <button style={styles.backBtn} onClick={() => navigate('/')}>
-        Evaluate Another Profile
-      </button>
+      <div style={styles.actions}>
+        <DownloadPDF username={data.profile?.username} />
+        <button style={styles.compareBtn} onClick={() => navigate('/compare')}>
+          ⚔️ Compare Profiles
+        </button>
+        <button style={styles.backBtn} onClick={() => navigate('/')}>
+          Evaluate Another
+        </button>
+      </div>
     </div>
   )
 }
@@ -78,14 +87,15 @@ const styles = {
   title: { color: '#f1f5f9', fontSize: '2rem', fontWeight: '700', margin: 0 },
   cacheBadge: { background: '#1e293b', color: '#22d3ee', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', border: '1px solid #22d3ee' },
   shareBox: { background: '#1e293b', borderRadius: '12px', padding: '20px', width: '100%', maxWidth: '600px' },
-  shareLabel: { color: '#94a3b8', marginBottom: '10px', fontSize: '0.9rem', margin: '0 0 10px' },
+  shareLabel: { color: '#94a3b8', marginBottom: '10px', fontSize: '0.9rem' },
   shareRow: { display: 'flex', gap: '10px' },
   shareInput: { flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #334155', background: '#0f172a', color: '#f1f5f9', fontSize: '0.85rem' },
   copyBtn: { padding: '10px 20px', background: '#6366f1', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: '600' },
-  backBtn: { padding: '12px 30px', background: '#6366f1', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '1rem', fontWeight: '600' },
+  actions: { display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' },
+  backBtn: { padding: '12px 24px', background: '#6366f1', color: 'white', border: 'none', borderRadius: '10px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '600' },
+  compareBtn: { padding: '12px 24px', background: '#0f172a', color: '#f1f5f9', border: '1px solid #6366f1', borderRadius: '10px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '600' },
   center: { minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0f172a', gap: '20px' },
-  text: { color: '#f1f5f9', fontSize: '1.1rem' },
-  spinner: { width: '48px', height: '48px', border: '4px solid #1e293b', borderTop: '4px solid #6366f1', borderRadius: '50%', animation: 'spin 1s linear infinite' }
+  text: { color: '#f1f5f9', fontSize: '1.1rem' }
 }
 
 export default Report
