@@ -3,6 +3,9 @@ const router = express.Router();
 const { evaluateProfile } = require('../services/githubService');
 const Report = require('../models/Report');
 const { v4: uuidv4 } = require('uuid');
+const Anthropic = require('@anthropic-ai/sdk');
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 router.post('/evaluate', async (req, res) => {
   try {
@@ -71,6 +74,33 @@ router.post('/evaluate', async (req, res) => {
     res.json({ shareId, scores: data.scores, profile: data.profile, events: data.events });
   } catch (error) {
     if (error.status === 404) return res.status(404).json({ error: 'GitHub user not found' });
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.post('/insights', async (req, res) => {
+  try {
+    const { profile, scores, mode } = req.body;
+
+    const prompt = mode === 'roast'
+      ? `You are a funny but kind tech roaster. Roast this GitHub profile in 3-4 sentences. Be witty and humorous but not mean. 
+         Profile: ${profile.username}, Bio: ${profile.bio || 'none'}, Repos: ${profile.publicRepos}, Stars: ${profile.totalStars}, 
+         Languages: ${Object.keys(profile.languages || {}).join(', ')}, Overall score: ${scores.overall}/100.
+         Keep it fun and end with one genuine compliment.`
+      : `You are a senior software engineer giving career advice. Give 4 specific, actionable tips to improve this GitHub profile for job hunting.
+         Profile: ${profile.username}, Bio: ${profile.bio || 'none'}, Repos: ${profile.publicRepos}, Stars: ${profile.totalStars},
+         Languages: ${Object.keys(profile.languages || {}).join(', ')}, 
+         Scores: Activity ${scores.activity}, Code Quality ${scores.codeQuality}, Diversity ${scores.diversity}, Community ${scores.community}, Hiring ${scores.hiringReady}.
+         Format as numbered list. Be specific and practical.`
+
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 400,
+      messages: [{ role: 'user', content: prompt }]
+    });
+
+    res.json({ insights: message.content[0].text });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
